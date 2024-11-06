@@ -3,13 +3,58 @@ agp = "8.7.2"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
+hiltAndroid = "2.51.1"
+kotlinxSerializationJson = "1.7.1"
 junitVersion = "1.2.1"
+orbitCompose = "4.3.2"
+orbitCore = "4.3.2"
+roomRuntime = "2.6.1"
+orbitTest = "4.3.2"
+orbitViewmodel = "4.3.2"
+voyagerBottomSheetNavigator = "1.1.0-beta02"
+voyagerTabNavigator = "1.1.0-beta02"
+voyagerVersion = "1.1.0-beta02"
 espressoCore = "3.6.1"
+accompanistSystemuicontroller = "0.32.0"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
-composeBom = "2024.04.01"
+composeBom = "2024.10.01"
+kotlinxCoroutinesCore = "1.9.0"
+converterGson = "2.11.0"
+loggingInterceptor = "5.0.0-alpha.3"
+appcompat = "1.7.0"
+retrofit = "2.11.0"
+retrofit2KotlinCoroutinesAdapter = "0.9.2"
+material = "1.12.0"
+gson = "2.11.0"
+roomCommon = "2.6.1"
+jetbrainsKotlinJvm = "2.0.0"
+lifecycleViewmodelAndroid = "2.8.7"
 
 [libraries]
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+retrofit2-kotlin-coroutines-adapter = { module = "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter", version.ref = "retrofit2KotlinCoroutinesAdapter" }
+androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+orbit-compose = { module = "org.orbit-mvi:orbit-compose", version.ref = "orbitCompose" }
+orbit-core = { module = "org.orbit-mvi:orbit-core", version.ref = "orbitCore" }
+orbit-test = { module = "org.orbit-mvi:orbit-test", version.ref = "orbitTest" }
+orbit-viewmodel = { module = "org.orbit-mvi:orbit-viewmodel", version.ref = "orbitViewmodel" }
+voyager-bottom-sheet-navigator = { module = "cafe.adriel.voyager:voyager-bottom-sheet-navigator", version.ref = "voyagerBottomSheetNavigator" }
+voyager-hilt = { module = "cafe.adriel.voyager:voyager-hilt", version.ref = "voyagerVersion" }
+voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyagerVersion" }
+voyager-tab-navigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyagerTabNavigator" }
+voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyagerVersion" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroid" }
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -24,9 +69,14 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-lifecycle-viewmodel-android = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-android", version.ref = "lifecycleViewmodelAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
 
