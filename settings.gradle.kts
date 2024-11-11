@@ -21,4 +21,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "ToDoAppYandex"
 include(":app")
- 
+include(":common")
+include(":data")
+include(":domain")
+include(":presenter")

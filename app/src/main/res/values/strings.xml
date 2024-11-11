@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">ToDoAppYandex</string>
+    <string name="home_screen_add_task">Добавить</string>
+    <string name="home_screen_title">Мои дела</string>
+    <string name="home_screen_done">Выполнено</string>
+    <string name="home_screen_hide_done">Скрыть выполненные</string>
+    <string name="home_screen_new_todo">Новое</string>
+    <string name="home_screen_task_info">Информация</string>
+    <string name="add_task_screen_exit">Выход</string>
+    <string name="add_task_screen_save">Сохранить</string>
+    <string name="add_task_screen_hint">Что надо сделать...</string>
+    <string name="add_task_screen_importance">Важность</string>
+    <string name="add_task_screen_no">нет</string>
+    <string name="add_task_screen_until">Сделать до</string>
+    <string name="add_task_screen_trash">Корзина</string>
+    <string name="add_task_screen_delete">Удалить</string>
+    <string name="add_task_screen_change_theme">Изменить тему</string>
 </resources>
