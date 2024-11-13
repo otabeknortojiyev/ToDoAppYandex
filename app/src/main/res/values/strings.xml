@@ -15,4 +15,5 @@
     <string name="add_task_screen_trash">Корзина</string>
     <string name="add_task_screen_delete">Удалить</string>
     <string name="add_task_screen_change_theme">Изменить тему</string>
+    <string name="home_screen_snackbar_text">Something went wrong</string>
 </resources>

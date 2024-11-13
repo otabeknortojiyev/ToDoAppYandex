@@ -3,12 +3,12 @@ package uz.yayra.otabek.domain.home.impl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import uz.yayra.otabek.data.repository.TodoItemRepository
-import uz.yayra.otabek.domain.home.SetThemeUseCase
+import uz.yayra.otabek.domain.home.SyncUseCase
 import javax.inject.Inject
 
-class SetThemeUseCaseImpl @Inject constructor(private val homeRepository: TodoItemRepository) : SetThemeUseCase {
+class SyncUseCaseImpl @Inject constructor(private val todoItemRepository: TodoItemRepository) : SyncUseCase {
     override fun invoke(): Flow<Unit> = flow {
-        homeRepository.setTheme()
+        todoItemRepository.syncData().onSuccess {}.onFailure {}
         emit(Unit)
     }
 }

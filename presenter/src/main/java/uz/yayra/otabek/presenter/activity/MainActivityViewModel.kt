@@ -8,6 +8,7 @@ import javax.inject.Inject
 /**
 Developed by Otabek Nortojiyev
  **/
+
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(private val getThemeUseCase: GetThemeUseCase) : ViewModel() {
 

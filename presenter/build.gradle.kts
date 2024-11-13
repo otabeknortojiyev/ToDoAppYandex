@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "uz.yayra.otabek.presenter"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 24
@@ -46,12 +46,17 @@ dependencies {
     //Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.work)
+    kapt(libs.androidx.hilt.compiler)
 
     //Orbit
     implementation(libs.orbit.core)
     implementation(libs.orbit.viewmodel)
     implementation(libs.orbit.compose)
     testImplementation(libs.orbit.test)
+
+    //Worker
+    implementation(libs.androidx.work.runtime.ktx)
 
     implementation(project(":common"))
     implementation(project(":domain"))

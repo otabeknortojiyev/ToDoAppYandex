@@ -61,20 +61,20 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import org.orbitmvi.orbit.compose.collectAsState
-import uz.yayra.otabek.common.TodoItem
+import uz.yayra.otabek.common.TodoEntity
 import uz.yayra.otabek.presenter.addTodo.AddTaskContract
 import uz.yayra.otabek.presenter.addTodo.AddTaskViewModel
-import uz.yayra.otabek.todoappyandex.utils.AppTextField
-import uz.yayra.otabek.todoappyandex.utils.formatLongToDateString
 import uz.yayra.otabek.todoappyandex.R
 import uz.yayra.otabek.todoappyandex.screens.activity.darkTheme
+import uz.yayra.otabek.todoappyandex.utils.AppTextField
+import uz.yayra.otabek.todoappyandex.utils.formatLongToDateString
 import java.util.Calendar
 
 /**
 Developed by Otabek Nortojiyev
  **/
 
-class AddTaskScreen(val data: TodoItem? = null) : Screen {
+class AddTaskScreen(val data: TodoEntity? = null) : Screen {
     @Composable
     override fun Content() {
         val viewModel: AddTaskContract.ViewModel = getViewModel<AddTaskViewModel>()
@@ -86,7 +86,7 @@ class AddTaskScreen(val data: TodoItem? = null) : Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddTaskScreenContent(
-    uiState: State<AddTaskContract.UiState>, onEventDispatcher: (AddTaskContract.Intent) -> Unit, data: TodoItem?
+    uiState: State<AddTaskContract.UiState>, onEventDispatcher: (AddTaskContract.Intent) -> Unit, data: TodoEntity?
 ) {
     LaunchedEffect(Unit) {
         if (data != null) {
@@ -106,9 +106,9 @@ private fun AddTaskScreenContent(
     var selectedIconIndex = remember {
         mutableIntStateOf(
             if (data != null) {
-                if (data.importance == 0) {
+                if (data.importance == "basic") {
                     2
-                } else if (data.importance == 1) {
+                } else if (data.importance == "low") {
                     1
                 } else {
                     3
@@ -149,28 +149,28 @@ private fun AddTaskScreenContent(
                         if (data != null) {
                             onEventDispatcher(
                                 AddTaskContract.Intent.Update(
-                                    TodoItem(
+                                    TodoEntity(
                                         data.id, text.value, if (selectedIconIndex.intValue == 2) {
-                                            0
+                                            "basic"
                                         } else if (selectedIconIndex.intValue == 1) {
-                                            1
+                                            "low"
                                         } else {
-                                            2
-                                        }, false, 0L, 0L, uiState.value.date
+                                            "important"
+                                        }, false, 0L, 0L, uiState.value.date, isOffline = true, isInsert = false, isUpdate = true, isDelete = false
                                     )
                                 )
                             )
                         } else {
                             onEventDispatcher(
                                 AddTaskContract.Intent.Save(
-                                    TodoItem(
+                                    TodoEntity(
                                         0, text.value, if (selectedIconIndex.intValue == 2) {
-                                            0
+                                            "basic"
                                         } else if (selectedIconIndex.intValue == 1) {
-                                            1
+                                            "low"
                                         } else {
-                                            2
-                                        }, false, 0L, 0L, uiState.value.date
+                                            "important"
+                                        }, false, 0L, 0L, uiState.value.date, isOffline = true, isInsert = true, isUpdate = false, isDelete = false
                                     )
                                 )
                             )
@@ -178,15 +178,10 @@ private fun AddTaskScreenContent(
                     }
                 }) {
                     Text(
-                        text = stringResource(R.string.add_task_screen_save),
-                        modifier = Modifier.padding(end = 16.dp),
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                        text = stringResource(R.string.add_task_screen_save), modifier = Modifier.padding(end = 16.dp), color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
-            }, colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.onTertiaryContainer
-            )
-            )
+            }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.onTertiaryContainer))
         },
     ) {
         Column(
@@ -235,8 +230,7 @@ private fun AddTaskScreenContent(
                         color = MaterialTheme.colorScheme.primaryContainer
                     )
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
+                        verticalAlignment = Alignment.CenterVertically, modifier = Modifier
                             .clip(shape = RoundedCornerShape(10.dp))
                             .background(color = MaterialTheme.colorScheme.onPrimary)
                     ) {
@@ -270,24 +264,22 @@ private fun AddTaskScreenContent(
                                     }
                                 )
                         )
-                        Text(text = stringResource(R.string.add_task_screen_no),
-                            modifier = Modifier
-                                .padding(vertical = 2.dp)
-                                .clip(shape = RoundedCornerShape(10.dp))
-                                .background(
-                                    color = if (selectedIconIndex.intValue == 2) {
-                                        MaterialTheme.colorScheme.onBackground
-                                    } else {
-                                        Color.Transparent
-                                    }
-                                )
-                                .clickable(
-                                    enabled = selectedIconIndex.intValue != 2
-                                ) {
-                                    selectedIconIndex.intValue = 2
+                        Text(text = stringResource(R.string.add_task_screen_no), modifier = Modifier
+                            .padding(vertical = 2.dp)
+                            .clip(shape = RoundedCornerShape(10.dp))
+                            .background(
+                                color = if (selectedIconIndex.intValue == 2) {
+                                    MaterialTheme.colorScheme.onBackground
+                                } else {
+                                    Color.Transparent
                                 }
-                                .padding(vertical = 10.dp, horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.primaryContainer)
+                            )
+                            .clickable(
+                                enabled = selectedIconIndex.intValue != 2
+                            ) {
+                                selectedIconIndex.intValue = 2
+                            }
+                            .padding(vertical = 10.dp, horizontal = 16.dp), color = MaterialTheme.colorScheme.primaryContainer)
                         Box(
                             modifier = Modifier
                                 .size(width = 1.dp, height = 24.dp)
@@ -343,10 +335,7 @@ private fun AddTaskScreenContent(
                         )
                         if (date != 0L) {
                             Text(
-                                text = formatLongToDateString(date),
-                                fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                                text = formatLongToDateString(date), fontFamily = FontFamily(Font(R.font.roboto_regular)), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSecondaryContainer
                             )
                         }
                     }
@@ -449,29 +438,25 @@ private fun AddTaskScreenContent(
                         .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 16.dp)
                         .clickable {
                             if (data != null) {
-                                onEventDispatcher(AddTaskContract.Intent.Delete(data = data))
+                                onEventDispatcher(AddTaskContract.Intent.Delete(data.copy(isOffline = true, isInsert = false, isUpdate = false, isDelete = true)))
+                            } else {
+                                onEventDispatcher(AddTaskContract.Intent.Back)
                             }
                         }, verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.add_task_screen_trash),
-                        tint = if (text.value.isNotEmpty()) {
+                        imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.add_task_screen_trash), tint = if (text.value.isNotEmpty()) {
                             MaterialTheme.colorScheme.onSecondary
                         } else {
                             MaterialTheme.colorScheme.secondary
                         }
                     )
                     Text(
-                        text = stringResource(R.string.add_task_screen_delete),
-                        fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                        fontSize = 16.sp,
-                        color = if (text.value.isNotEmpty()) {
+                        text = stringResource(R.string.add_task_screen_delete), fontFamily = FontFamily(Font(R.font.roboto_regular)), fontSize = 16.sp, color = if (text.value.isNotEmpty()) {
                             MaterialTheme.colorScheme.onSecondary
                         } else {
                             MaterialTheme.colorScheme.secondary
-                        },
-                        modifier = Modifier.padding(start = 10.dp)
+                        }, modifier = Modifier.padding(start = 10.dp)
                     )
                 }
             }

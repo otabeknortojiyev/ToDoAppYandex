@@ -1,18 +1,17 @@
 package uz.yayra.otabek.data.repository
 
-import kotlinx.coroutines.flow.Flow
-import uz.yayra.otabek.common.TodoItem
+import uz.yayra.otabek.common.TodoEntity
 
 
 interface TodoItemRepository {
-    fun getTodo(): Flow<List<TodoItem>>
-    fun getTodoActive(): Flow<List<TodoItem>>
-    suspend fun insert(data: TodoItem): Boolean
-    suspend fun update(data: TodoItem): Boolean
-    suspend fun delete(data: TodoItem)
-    suspend fun checkEye(): Boolean
-    suspend fun changeEye()
-    fun getCompleteCount(): Flow<Int>
+    suspend fun getTodo(network: Boolean, isShow: Boolean): Result<List<TodoEntity>>
+    suspend fun insert(data: TodoEntity, network: Boolean): Result<Boolean>
+    suspend fun update(data: TodoEntity, network: Boolean): Result<Boolean>
+    suspend fun delete(data: TodoEntity, network: Boolean): Result<Unit>
+    suspend fun checkEye(): Result<Boolean>
+    fun changeEye()
+    suspend fun getCompleteCount(): Result<Int>
     fun getTheme(): Boolean
-    fun setTheme()
+    suspend fun setTheme(): Result<Unit>
+    suspend fun syncData(): Result<Unit>
 }

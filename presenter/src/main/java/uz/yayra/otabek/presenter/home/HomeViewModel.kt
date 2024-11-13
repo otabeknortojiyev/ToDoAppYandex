@@ -16,13 +16,14 @@ import uz.yayra.otabek.domain.home.CheckEyeUseCase
 import uz.yayra.otabek.domain.home.DeleteUseCase
 import uz.yayra.otabek.domain.home.GetCompleteCountUseCase
 import uz.yayra.otabek.domain.home.GetTodoUseCase
+import uz.yayra.otabek.domain.home.SyncUseCase
 import uz.yayra.otabek.domain.home.UpdateUseCase
+import uz.yayra.otabek.presenter.utils.NetworkStatusValidator
 import javax.inject.Inject
 
 /**
 Developed by Otabek Nortojiyev
  **/
-
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -32,26 +33,38 @@ class HomeViewModel @Inject constructor(
     private val updateUseCase: UpdateUseCase,
     private val checkEyeUseCase: CheckEyeUseCase,
     private val changeEyeUseCase: ChangeEyeUseCase,
-    private val getCompleteCountUseCase: GetCompleteCountUseCase
+    private val getCompleteCountUseCase: GetCompleteCountUseCase,
+    private val networkStatusValidator: NetworkStatusValidator,
+    private val syncUseCase: SyncUseCase
 ) : ViewModel(), HomeContract.ViewModel {
+
+    override val container = container<HomeContract.UiState, HomeContract.SideEffect>(HomeContract.UiState(internet = networkStatusValidator.isNetworkEnabled))
+
+    init {
+        networkStatusValidator.fl.onEach { internetStatus ->
+            intent {
+                reduce { state.copy(internet = internetStatus) }
+            }
+            if (internetStatus) {
+                syncUseCase.invoke().onEach {
+                }.onCompletion { updateList() }.launchIn(viewModelScope)
+            }
+        }.launchIn(viewModelScope)
+    }
+
     override fun onEventDispatcher(intent: HomeContract.Intent) = intent() {
         when (intent) {
+
             HomeContract.Intent.Init -> {
-                checkEyeUseCase.invoke().onStart {
-                    reduce { state.copy(isLoading = true) }
-                }.onEach {
-                    getCompleteCountUseCase.invoke().onEach { reduce { state.copy(done = it) } }.launchIn(viewModelScope)
-                    getTodoUseCase.invoke(it).onStart {
-                        reduce { state.copy(isLoading = true) }
-                    }.onEach {
-                        reduce { state.copy(todos = it) }
-                    }.onCompletion {
-                        reduce { state.copy(isLoading = false) }
-                    }.launchIn(viewModelScope)
-                    reduce { state.copy(eye = it) }
-                }.onCompletion {
-                    reduce { state.copy(isLoading = false) }
-                }.launchIn(viewModelScope)
+                updateList()
+            }
+
+            HomeContract.Intent.GetAll -> {
+                updateList()
+            }
+
+            HomeContract.Intent.ChangeEye -> {
+                changeEyeUseCase.invoke()
             }
 
             is HomeContract.Intent.OpenAddScreen -> {
@@ -64,57 +77,24 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
-            is HomeContract.Intent.DeleteTask -> {
-                deleteUseCase.invoke(intent.data).onStart {
+            is HomeContract.Intent.Delete -> {
+                deleteUseCase.invoke(intent.data, state.internet).onStart {
                     reduce { state.copy(isLoading = true) }
                 }.onEach {
                     updateList()
-                }.onCompletion {}.launchIn(viewModelScope)
-            }
-
-            HomeContract.Intent.GetAll -> {
-                getCompleteCountUseCase.invoke().onEach {
-                    reduce { state.copy(done = it) }
-                }.launchIn(viewModelScope)
-                getTodoUseCase.invoke(isShow = true).onStart {
-                    reduce { state.copy(isLoading = true) }
-                }.onEach {
-                    reduce { state.copy(todos = it) }
-                }.onCompletion {
-                    reduce { state.copy(isLoading = false) }
-                }.launchIn(viewModelScope)
-            }
-
-            HomeContract.Intent.GetActive -> {
-                getCompleteCountUseCase.invoke().onEach {
-                    reduce { state.copy(done = it) }
-                }.launchIn(viewModelScope)
-                getTodoUseCase(isShow = false).onStart {
-                    reduce { state.copy(isLoading = true) }
-                }.onEach {
-                    reduce { state.copy(todos = it) }
                 }.onCompletion {
                     reduce { state.copy(isLoading = false) }
                 }.launchIn(viewModelScope)
             }
 
             is HomeContract.Intent.Update -> {
-                updateUseCase.invoke(intent.data).onStart {
+                updateUseCase.invoke(intent.data, state.internet).onStart {
                     reduce { state.copy(isLoading = true) }
                 }.onEach {
                     updateList()
                 }.onCompletion {
                     reduce { state.copy(isLoading = false) }
                 }.launchIn(viewModelScope)
-            }
-
-            HomeContract.Intent.ChangeEye -> {
-                changeEyeUseCase.invoke().onStart {
-                    reduce { state.copy(isLoading = true) }
-                }.onEach {
-                    val eye = state.eye
-                    reduce { state.copy(eye = !eye, isLoading = false) }
-                }.onCompletion {}.launchIn(viewModelScope)
             }
         }
     }
@@ -123,21 +103,17 @@ class HomeViewModel @Inject constructor(
         checkEyeUseCase.invoke().onStart {
             reduce { state.copy(isLoading = true) }
         }.onEach {
-            getCompleteCountUseCase.invoke().onEach { reduce { state.copy(done = it) } }.launchIn(viewModelScope)
-            getTodoUseCase.invoke(it).onStart {
+            getTodoUseCase.invoke(state.internet, it).onStart {
                 reduce { state.copy(isLoading = true) }
             }.onEach {
                 reduce { state.copy(todos = it) }
+                getCompleteCountUseCase.invoke().onEach { reduce { state.copy(done = it) } }.launchIn(viewModelScope)
             }.onCompletion {
                 reduce { state.copy(isLoading = false) }
             }.launchIn(viewModelScope)
             reduce { state.copy(eye = it) }
         }.onCompletion {
-            reduce {
-                state.copy(isLoading = false)
-            }
+            reduce { state.copy(isLoading = false) }
         }.launchIn(viewModelScope)
     }
-
-    override val container = container<HomeContract.UiState, HomeContract.SideEffect>(HomeContract.UiState())
 }
