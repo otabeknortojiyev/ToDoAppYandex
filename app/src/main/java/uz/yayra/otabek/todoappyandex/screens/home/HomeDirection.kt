@@ -1,6 +1,6 @@
 package uz.yayra.otabek.todoappyandex.screens.home
 
-import uz.yayra.otabek.common.TodoItem
+import uz.yayra.otabek.common.TodoEntity
 import uz.yayra.otabek.presenter.home.HomeContract
 import uz.yayra.otabek.todoappyandex.screens.addTodo.AddTaskScreen
 import uz.yayra.otabek.todoappyandex.ui.navigation.AppNavigator
@@ -11,7 +11,7 @@ Developed by Otabek Nortojiyev
  **/
 
 class HomeDirection @Inject constructor(private val navigator: AppNavigator) : HomeContract.Direction {
-    override suspend fun openAddScreen(data: TodoItem?) {
+    override suspend fun openAddScreen(data: TodoEntity?) {
         if (data != null) {
             navigator.push(AddTaskScreen(data))
         } else {

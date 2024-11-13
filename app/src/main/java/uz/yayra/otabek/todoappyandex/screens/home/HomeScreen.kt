@@ -28,6 +28,9 @@ import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxColors
@@ -35,6 +38,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,11 +62,11 @@ import cafe.adriel.voyager.hilt.getViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
 import org.orbitmvi.orbit.compose.collectAsState
-import uz.yayra.otabek.common.TodoItem
+import uz.yayra.otabek.common.TodoEntity
 import uz.yayra.otabek.presenter.home.HomeContract
 import uz.yayra.otabek.presenter.home.HomeViewModel
-import uz.yayra.otabek.todoappyandex.utils.formatLongToDateString
 import uz.yayra.otabek.todoappyandex.R
+import uz.yayra.otabek.todoappyandex.utils.formatLongToDateString
 
 /**
 Developed by Otabek Nortojiyev
@@ -83,97 +87,96 @@ var move = mutableStateOf(true)
 
 @Composable
 private fun HomeScreenContent(uiState: State<HomeContract.UiState>, onEventDispatcher: (HomeContract.Intent) -> Unit) {
-    LaunchedEffect(Unit) {
-        onEventDispatcher(HomeContract.Intent.Init)
-    }
+    LaunchedEffect(Unit) { onEventDispatcher(HomeContract.Intent.Init) }
+    val pullRefreshState = rememberPullRefreshState(refreshing = uiState.value.isLoading, onRefresh = {
+        onEventDispatcher(HomeContract.Intent.GetAll)
+    })
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
                     onEventDispatcher(HomeContract.Intent.OpenAddScreen())
-                },
-                shape = CircleShape,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                }, shape = CircleShape, contentColor = MaterialTheme.colorScheme.onSecondaryContainer, containerColor = MaterialTheme.colorScheme.tertiaryContainer
             ) {
                 Image(painter = painterResource(R.drawable.add), contentDescription = stringResource(R.string.home_screen_add_task))
             }
         }, containerColor = MaterialTheme.colorScheme.onTertiaryContainer
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.padding(start = 60.dp, top = 60.dp, end = 20.dp)) {
-                Text(
-                    text = stringResource(R.string.home_screen_title),
-                    fontSize = 32.sp,
-                    modifier = Modifier.padding(it),
-                    fontFamily = FontFamily(Font(R.font.roboto_medium)),
-                    color = MaterialTheme.colorScheme.primaryContainer
-                )
-                Row {
+        if (!uiState.value.internet) {
+            Snackbar(containerColor = MaterialTheme.colorScheme.onSecondary) { Text(text = stringResource(R.string.home_screen_snackbar_text), fontSize = 22.sp) }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pullRefresh(pullRefreshState)
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.padding(start = 60.dp, top = 60.dp, end = 20.dp)) {
                     Text(
-                        text = "${stringResource(R.string.home_screen_done)} - ${uiState.value.done}",
-                        color = MaterialTheme.colorScheme.inversePrimary,
-                        fontFamily = FontFamily(
-                            Font(
-                                R.font.roboto_regular
-                            )
-                        ),
-                        fontSize = 16.sp
+                        text = stringResource(R.string.home_screen_title),
+                        fontSize = 32.sp,
+                        modifier = Modifier.padding(it),
+                        fontFamily = FontFamily(Font(R.font.roboto_medium)),
+                        color = MaterialTheme.colorScheme.primaryContainer
                     )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Image(painter = if (uiState.value.eye) {
-                        painterResource(R.drawable.eye_visible)
-                    } else {
-                        painterResource(R.drawable.eye_invisible)
-                    }, contentDescription = stringResource(R.string.home_screen_hide_done), modifier = Modifier
-                        .clip(CircleShape)
-                        .clickable {
-                            onEventDispatcher(HomeContract.Intent.ChangeEye)
-                            if (!uiState.value.eye) {
-                                onEventDispatcher(HomeContract.Intent.GetAll)
-                            } else {
-                                onEventDispatcher(HomeContract.Intent.GetActive)
-                            }
-                        })
-                }
-            }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 20.dp)
-                    .clip(shape = RoundedCornerShape(10.dp))
-                    .background(color = MaterialTheme.colorScheme.background)
-            ) {
-                items(uiState.value.todos, key = {
-                    it.hashCode()
-                }) { item ->
-                    SwipeToDeleteContainer(item = item, onDelete = {
-                        onEventDispatcher(HomeContract.Intent.DeleteTask(it))
-                    }, onComplete = {
-                        onEventDispatcher(
-                            HomeContract.Intent.Update(
-                                it.copy(isCompleted = true)
-                            )
+                    Row {
+                        Text(
+                            text = "${stringResource(R.string.home_screen_done)} - ${uiState.value.done}", color = MaterialTheme.colorScheme.inversePrimary, fontFamily = FontFamily(
+                                Font(
+                                    R.font.roboto_regular
+                                )
+                            ), fontSize = 16.sp
                         )
-                        if (uiState.value.eye) {
-                            onEventDispatcher(HomeContract.Intent.GetAll)
+                        Spacer(modifier = Modifier.weight(1f))
+                        Image(painter = if (uiState.value.eye) {
+                            painterResource(R.drawable.eye_visible)
                         } else {
-                            onEventDispatcher(HomeContract.Intent.GetActive)
-                        }
-                    }) { data ->
-                        Item(data, onEventDispatcher)
+                            painterResource(R.drawable.eye_invisible)
+                        }, contentDescription = stringResource(R.string.home_screen_hide_done), modifier = Modifier
+                            .clip(CircleShape)
+                            .clickable {
+                                onEventDispatcher(HomeContract.Intent.ChangeEye)
+                                onEventDispatcher(HomeContract.Intent.GetAll)
+                            })
                     }
                 }
-                item {
-                    Text(
-                        text = stringResource(R.string.home_screen_new_todo),
-                        color = MaterialTheme.colorScheme.inversePrimary,
-                        fontSize = 16.sp,
-                        fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                        modifier = Modifier.padding(start = 40.dp, top = 10.dp, bottom = 10.dp)
-                    )
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 20.dp)
+                        .clip(shape = RoundedCornerShape(10.dp))
+                        .background(color = MaterialTheme.colorScheme.background)
+                ) {
+                    items(uiState.value.todos, key = { it.hashCode() }) { item ->
+                        SwipeToDeleteContainer(item = item, onDelete = {
+                            onEventDispatcher(HomeContract.Intent.Delete(it.copy(isOffline = true, isInsert = false, isUpdate = false, isDelete = true)))
+                        }, onComplete = {
+                            onEventDispatcher(
+                                HomeContract.Intent.Update(it.copy(isCompleted = true, isOffline = true, isInsert = false, isUpdate = true, isDelete = false))
+                            )
+                        }) { data ->
+                            Item(data, onEventDispatcher)
+                        }
+                    }
+                    item {
+                        Text(text = stringResource(R.string.home_screen_new_todo),
+                            color = MaterialTheme.colorScheme.inversePrimary,
+                            fontSize = 16.sp,
+                            fontFamily = FontFamily(Font(R.font.roboto_regular)),
+                            modifier = Modifier
+                                .padding(start = 40.dp, top = 10.dp, bottom = 10.dp)
+                                .clickable {
+                                    onEventDispatcher(HomeContract.Intent.OpenAddScreen())
+                                })
+                    }
                 }
             }
+            PullRefreshIndicator(
+                refreshing = uiState.value.isLoading,
+                state = pullRefreshState,
+                modifier = Modifier.align(alignment = Alignment.TopCenter),
+                backgroundColor = if (uiState.value.isLoading) Color.Green else Color.Red
+            )
         }
     }
     val systemUiController = rememberSystemUiController()
@@ -221,11 +224,7 @@ fun CompleteBackGround(
 
 @Composable
 fun SwipeToDeleteContainer(
-    item: TodoItem,
-    onDelete: (TodoItem) -> Unit,
-    onComplete: (TodoItem) -> Unit,
-    animationDuration: Int = 500,
-    content: @Composable (TodoItem) -> Unit
+    item: TodoEntity, onDelete: (TodoEntity) -> Unit, onComplete: (TodoEntity) -> Unit, animationDuration: Int = 500, content: @Composable (TodoEntity) -> Unit
 ) {
     var isRemoved = remember { mutableStateOf(false) }
     var isCompleted = remember { mutableStateOf(false) }
@@ -273,8 +272,7 @@ fun SwipeToDeleteContainer(
     }
 
     AnimatedVisibility(
-        visible = !isRemoved.value && !isCompleted.value,
-        exit = shrinkVertically(animationSpec = tween(durationMillis = animationDuration), shrinkTowards = Alignment.Top) + fadeOut()
+        visible = !isRemoved.value && !isCompleted.value, exit = shrinkVertically(animationSpec = tween(durationMillis = animationDuration), shrinkTowards = Alignment.Top) + fadeOut()
     ) {
         SwipeToDismiss(state = swipeDismissState, background = {
             if (swipeDismissState.dismissDirection == DismissDirection.EndToStart && move.value) {
@@ -290,7 +288,7 @@ fun SwipeToDeleteContainer(
 }
 
 @Composable
-private fun Item(data: TodoItem, onEventDispatcher: (HomeContract.Intent) -> Unit) {
+private fun Item(data: TodoEntity, onEventDispatcher: (HomeContract.Intent) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -305,9 +303,7 @@ private fun Item(data: TodoItem, onEventDispatcher: (HomeContract.Intent) -> Uni
             checked = data.isCompleted, onCheckedChange = {
                 if (!data.isCompleted) {
                     onEventDispatcher(
-                        HomeContract.Intent.Update(
-                            data.copy(isCompleted = true)
-                        )
+                        HomeContract.Intent.Update(data.copy(isCompleted = true, isOffline = true, isInsert = false, isUpdate = true, isDelete = false))
                     )
                 }
             }, enabled = !data.isCompleted, colors = if (data.isCompleted) {
@@ -325,7 +321,7 @@ private fun Item(data: TodoItem, onEventDispatcher: (HomeContract.Intent) -> Uni
                     disabledUncheckedBorderColor = Color.Transparent,
                     disabledIndeterminateBorderColor = Color.Transparent
                 )
-            } else if (data.importance == 0 || data.importance == 1) {
+            } else if (data.importance == "basic" || data.importance == "low") {
                 CheckboxColors(
                     checkedCheckmarkColor = Color.Transparent,
                     uncheckedCheckmarkColor = Color.Transparent,
@@ -357,11 +353,11 @@ private fun Item(data: TodoItem, onEventDispatcher: (HomeContract.Intent) -> Uni
                 )
             }
         )
-        if (data.importance == 1 && !data.isCompleted) {
+        if (data.importance == "low" && !data.isCompleted) {
             Image(
                 painter = painterResource(R.drawable.priority_low), contentDescription = null, modifier = Modifier.padding(top = 10.dp)
             )
-        } else if (data.importance == 2 && !data.isCompleted) {
+        } else if (data.importance == "important" && !data.isCompleted) {
             Image(
                 painter = painterResource(R.drawable.priority_high), contentDescription = null, modifier = Modifier.padding(top = 10.dp)
             )
@@ -372,17 +368,11 @@ private fun Item(data: TodoItem, onEventDispatcher: (HomeContract.Intent) -> Uni
                 .weight(1f), horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = data.text,
-                maxLines = 3,
-                color = if (!data.isCompleted) {
+                text = data.text, maxLines = 3, color = if (!data.isCompleted) {
                     MaterialTheme.colorScheme.primaryContainer
                 } else {
                     MaterialTheme.colorScheme.inversePrimary
-                },
-                fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                fontSize = 16.sp,
-                overflow = TextOverflow.Ellipsis,
-                textDecoration = if (data.isCompleted) {
+                }, fontFamily = FontFamily(Font(R.font.roboto_regular)), fontSize = 16.sp, overflow = TextOverflow.Ellipsis, textDecoration = if (data.isCompleted) {
                     TextDecoration.LineThrough
                 } else {
                     TextDecoration.None
@@ -390,17 +380,16 @@ private fun Item(data: TodoItem, onEventDispatcher: (HomeContract.Intent) -> Uni
             )
             if (data.deadLine != 0L) {
                 Text(
-                    text = formatLongToDateString(data.deadLine),
-                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.inversePrimary
+                    text = formatLongToDateString(data.deadLine), fontFamily = FontFamily(Font(R.font.roboto_regular)), fontSize = 14.sp, color = MaterialTheme.colorScheme.inversePrimary
                 )
             }
         }
         Icon(
-            painter = painterResource(R.drawable.info),
-            contentDescription = stringResource(R.string.home_screen_task_info),
-            modifier = Modifier.padding(10.dp)
+            painter = if (data.isOffline) {
+                painterResource(R.drawable.offline)
+            } else {
+                painterResource(R.drawable.info)
+            }, contentDescription = stringResource(R.string.home_screen_task_info), modifier = Modifier.padding(10.dp)
         )
     }
 }

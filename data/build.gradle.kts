@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "uz.yayra.otabek.data"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 24
@@ -52,6 +52,10 @@ dependencies {
     //Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+
+    //Chuck
+    debugImplementation(libs.library)
+    releaseImplementation(libs.library.no.op)
 
     //ROOM
     implementation(libs.androidx.room.runtime)

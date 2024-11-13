@@ -1,7 +1,7 @@
 package uz.yayra.otabek.presenter.addTodo
 
 import org.orbitmvi.orbit.ContainerHost
-import uz.yayra.otabek.common.TodoItem
+import uz.yayra.otabek.common.TodoEntity
 
 /**
 Developed by Otabek Nortojiyev
@@ -14,7 +14,8 @@ interface AddTaskContract {
 
     data class UiState(
         val isLoading: Boolean = false,
-        val date: Long = 0L
+        val date: Long = 0L,
+        val internet: Boolean
     )
 
     sealed interface SideEffect {
@@ -27,11 +28,11 @@ interface AddTaskContract {
 
     interface Intent {
         data class Init(val date: Long) : Intent
-        data object Back : Intent
         data class Date(val date: Long) : Intent
-        data class Save(val data: TodoItem) : Intent
-        data class Delete(val data: TodoItem) : Intent
-        data class Update(val data: TodoItem) : Intent
+        data class Save(val data: TodoEntity) : Intent
+        data class Update(val data: TodoEntity) : Intent
+        data class Delete(val data: TodoEntity) : Intent
         data object SetTheme : Intent
+        data object Back : Intent
     }
 }

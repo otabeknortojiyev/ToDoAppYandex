@@ -62,6 +62,8 @@ dependencies {
     //DAGGER_HILT
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.work)
+    kapt(libs.androidx.hilt.compiler)
 
     //Voyager
     implementation(libs.voyager.navigator)
@@ -94,6 +96,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.kotlinx.coroutines.core)
+
+    //Worker
+    implementation(libs.androidx.work.runtime.ktx)
 
     implementation(project(":common"))
     implementation(project(":presenter"))
