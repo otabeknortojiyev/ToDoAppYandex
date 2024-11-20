@@ -1,11 +1,16 @@
 package uz.yayra.otabek.domain.home.impl
 
 import kotlinx.coroutines.flow.Flow
-import uz.yayra.otabek.common.TodoItem
+import kotlinx.coroutines.flow.flow
+import uz.yayra.otabek.common.TodoEntity
 import uz.yayra.otabek.data.repository.TodoItemRepository
 import uz.yayra.otabek.domain.home.GetTodoUseCase
 import javax.inject.Inject
 
 class GetTodoUseCaseImpl @Inject constructor(private val todoItemRepository: TodoItemRepository) : GetTodoUseCase {
-    override fun invoke(isShow: Boolean): Flow<List<TodoItem>> = if (isShow) todoItemRepository.getTodo() else todoItemRepository.getTodoActive()
+    override fun invoke(network: Boolean, isShow: Boolean): Flow<List<TodoEntity>> = flow {
+        todoItemRepository.getTodo(network, isShow).onSuccess {
+            emit(it)
+        }.onFailure {}
+    }
 }
