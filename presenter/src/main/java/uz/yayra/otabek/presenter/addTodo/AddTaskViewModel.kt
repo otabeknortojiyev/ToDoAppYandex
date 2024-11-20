@@ -95,15 +95,11 @@ class AddTaskViewModel @Inject constructor(
 
 
             AddTaskContract.Intent.SetTheme -> {
-                setThemeUseCase.invoke().onEach {
-
-                }.launchIn(viewModelScope)
+                setThemeUseCase.invoke().onEach {}.launchIn(viewModelScope)
             }
 
             AddTaskContract.Intent.Back -> {
-                viewModelScope.launch {
-                    direction.back()
-                }
+                viewModelScope.launch { direction.back() }
             }
         }
     }

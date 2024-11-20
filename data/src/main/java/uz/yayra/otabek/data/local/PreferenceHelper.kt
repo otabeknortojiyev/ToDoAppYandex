@@ -9,8 +9,7 @@ import kotlin.reflect.KProperty
 abstract class SharedPreference(context: Context, preferences: SharedPreferences? = null) {
     private val pref = preferences ?: context.getSharedPreferences(javaClass.canonicalName, Context.MODE_PRIVATE)
 
-    inner class booleans(private val init: Boolean = false) :
-        ReadWriteProperty<Any, Boolean> {
+    inner class booleans(private val init: Boolean = false) : ReadWriteProperty<Any, Boolean> {
         override fun getValue(thisRef: Any, property: KProperty<*>) = pref.getBoolean(property.name, init)
         override fun setValue(thisRef: Any, property: KProperty<*>, value: Boolean) = pref.edit { putBoolean(property.name, value).apply() }
     }
@@ -30,10 +29,8 @@ abstract class SharedPreference(context: Context, preferences: SharedPreferences
         override fun setValue(thisRef: Any, property: KProperty<*>, value: String) = pref.edit { putString(property.name, value).apply() }
     }
 
-    inner class stringsNullable(private val defValue: String? = null) :
-        ReadWriteProperty<Any, String?> {
+    inner class stringsNullable(private val defValue: String? = null) : ReadWriteProperty<Any, String?> {
         override fun getValue(thisRef: Any, property: KProperty<*>): String? = pref.getString(property.name, defValue)
-        override fun setValue(thisRef: Any, property: KProperty<*>, value: String?) =
-            value?.run { pref.edit { putString(property.name, value).apply() } } ?: Unit
+        override fun setValue(thisRef: Any, property: KProperty<*>, value: String?) = value?.run { pref.edit { putString(property.name, value).apply() } } ?: Unit
     }
 }

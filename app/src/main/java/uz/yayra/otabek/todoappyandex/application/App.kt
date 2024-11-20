@@ -20,6 +20,7 @@ class App : Application() {
 
     private fun schedulePeriodicDataSync() {
         val syncRequest = PeriodicWorkRequestBuilder<DataSyncWorker>(8, TimeUnit.HOURS)
+            .setInitialDelay(8, TimeUnit.HOURS)
             .setConstraints(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)

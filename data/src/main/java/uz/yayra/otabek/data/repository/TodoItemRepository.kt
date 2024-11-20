@@ -9,9 +9,9 @@ interface TodoItemRepository {
     suspend fun update(data: TodoEntity, network: Boolean): Result<Boolean>
     suspend fun delete(data: TodoEntity, network: Boolean): Result<Unit>
     suspend fun checkEye(): Result<Boolean>
-    fun changeEye()
     suspend fun getCompleteCount(): Result<Int>
-    fun getTheme(): Boolean
     suspend fun setTheme(): Result<Unit>
     suspend fun syncData(): Result<Unit>
+    fun changeEye()
+    fun getTheme(): Boolean
 }
