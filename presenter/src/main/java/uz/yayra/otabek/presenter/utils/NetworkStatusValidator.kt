@@ -31,8 +31,8 @@ class NetworkStatusValidator @Inject constructor(@ApplicationContext private val
 
             override fun onLost(network: Network) {
                 super.onLost(network)
-                isNetworkEnabled = false
                 fl.value = false
+                isNetworkEnabled = false
             }
         }
         val connectivityManager = context.getSystemService(ConnectivityManager::class.java) as ConnectivityManager

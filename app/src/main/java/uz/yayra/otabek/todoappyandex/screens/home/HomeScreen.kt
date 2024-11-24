@@ -83,7 +83,7 @@ object HomeScreen : Screen {
     }
 }
 
-var move = mutableStateOf(true)
+private var move = mutableStateOf(true)
 
 @Composable
 private fun HomeScreenContent(uiState: State<HomeContract.UiState>, onEventDispatcher: (HomeContract.Intent) -> Unit) {
@@ -185,7 +185,7 @@ private fun HomeScreenContent(uiState: State<HomeContract.UiState>, onEventDispa
 }
 
 @Composable
-fun DeleteBackGround(
+private fun DeleteBackGround(
     swipeDismissState: DismissState
 ) {
     val color = if (swipeDismissState.dismissDirection == DismissDirection.EndToStart) {
@@ -204,7 +204,7 @@ fun DeleteBackGround(
 }
 
 @Composable
-fun CompleteBackGround(
+private fun CompleteBackGround(
     swipeDismissState: DismissState
 ) {
     val color = if (swipeDismissState.dismissDirection == DismissDirection.StartToEnd) {
@@ -223,7 +223,7 @@ fun CompleteBackGround(
 }
 
 @Composable
-fun SwipeToDeleteContainer(
+private fun SwipeToDeleteContainer(
     item: TodoEntity, onDelete: (TodoEntity) -> Unit, onComplete: (TodoEntity) -> Unit, animationDuration: Int = 500, content: @Composable (TodoEntity) -> Unit
 ) {
     var isRemoved = remember { mutableStateOf(false) }

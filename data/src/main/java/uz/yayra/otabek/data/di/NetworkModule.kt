@@ -21,11 +21,13 @@ class NetworkModule {
     fun providesOkHttpClient(
         @ApplicationContext context: Context,
         storage: LocalStorage,
-    ): OkHttpClient = OkHttpClient.Builder().addInterceptor(ChuckerInterceptor.Builder(context).build()).addInterceptor { chain ->
-        val request = chain.request()
-        val newRequest = request.newBuilder().header("Authorization", "Bearer ${storage.token}").header("X-Last-Known-Revision", "${storage.revision.toInt()}").build()
-        chain.proceed(newRequest)
-    }.build()
+    ): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(ChuckerInterceptor.Builder(context).build())
+        .addInterceptor { chain ->
+            val request = chain.request()
+            val newRequest = request.newBuilder().header("Authorization", "Bearer ${storage.token}").header("X-Last-Known-Revision", "${storage.revision.toInt()}").build()
+            chain.proceed(newRequest)
+        }.build()
 
     @[Provides Singleton]
     fun providesRetrofit(okHttpClient: OkHttpClient): Retrofit =
