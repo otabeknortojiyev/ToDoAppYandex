@@ -25,82 +25,82 @@ Developed by Otabek Nortojiyev
 
 @HiltViewModel
 class AddTaskViewModel @Inject constructor(
-    private val direction: AddTaskContract.Direction,
-    private val insertUseCase: InsertUseCase,
-    private val deleteUseCase: DeleteUseCase,
-    private val updateUseCase: UpdateUseCase,
-    private val setThemeUseCase: SetThemeUseCase,
-    private val networkStatusValidator: NetworkStatusValidator,
-    private val syncUseCase: SyncUseCase
+  private val direction: AddTaskContract.Direction,
+  private val insertUseCase: InsertUseCase,
+  private val deleteUseCase: DeleteUseCase,
+  private val updateUseCase: UpdateUseCase,
+  private val setThemeUseCase: SetThemeUseCase,
+  private val networkStatusValidator: NetworkStatusValidator,
+  private val syncUseCase: SyncUseCase
 ) : ViewModel(), AddTaskContract.ViewModel {
 
-    override val container =
-        container<AddTaskContract.UiState, AddTaskContract.SideEffect>(AddTaskContract.UiState(internet = networkStatusValidator.isNetworkEnabled))
+  override val container =
+    container<AddTaskContract.UiState, AddTaskContract.SideEffect>(AddTaskContract.UiState(internet = networkStatusValidator.isNetworkEnabled))
 
-    init {
-        networkStatusValidator.fl.onEach { internetStatus ->
-            intent {
-                reduce { state.copy(internet = internetStatus) }
-            }
-            if (internetStatus) {
-                syncUseCase.invoke().onEach {}.launchIn(viewModelScope)
-            }
+  init {
+    networkStatusValidator.fl.onEach { internetStatus ->
+      intent {
+        reduce { state.copy(internet = internetStatus) }
+      }
+      if (internetStatus) {
+        syncUseCase.invoke().onEach {}.launchIn(viewModelScope)
+      }
+    }.launchIn(viewModelScope)
+  }
+
+  override fun onEventDispatcher(intent: AddTaskContract.Intent) = intent() {
+    when (intent) {
+
+      is AddTaskContract.Intent.Init -> {
+        reduce { state.copy(isLoading = true) }
+        reduce { state.copy(date = intent.date) }
+        reduce { state.copy(isLoading = false) }
+      }
+
+      is AddTaskContract.Intent.Date -> {
+        reduce { state.copy(date = intent.date) }
+      }
+
+
+      is AddTaskContract.Intent.Save -> {
+        insertUseCase.invoke(intent.data, state.internet).onStart {
+          reduce { state.copy(isLoading = true) }
+        }.onEach {
+          direction.back()
+        }.onCompletion {
+          reduce { state.copy(isLoading = false) }
         }.launchIn(viewModelScope)
+      }
+
+
+      is AddTaskContract.Intent.Update -> {
+        updateUseCase.invoke(intent.data, state.internet).onStart {
+          reduce { state.copy(isLoading = true) }
+        }.onEach {
+          direction.back()
+        }.onCompletion {
+          reduce { state.copy(isLoading = false) }
+        }.launchIn(viewModelScope)
+      }
+
+      is AddTaskContract.Intent.Delete -> {
+        deleteUseCase.invoke(intent.data, state.internet).onStart {
+          reduce { state.copy(isLoading = true) }
+        }.onEach {
+          direction.back()
+        }.onCompletion {
+          reduce { state.copy(isLoading = false) }
+        }.launchIn(viewModelScope)
+      }
+
+
+      AddTaskContract.Intent.SetTheme -> {
+        setThemeUseCase.invoke().onEach {}.launchIn(viewModelScope)
+      }
+
+      AddTaskContract.Intent.Back -> {
+        viewModelScope.launch { direction.back() }
+      }
     }
-
-    override fun onEventDispatcher(intent: AddTaskContract.Intent) = intent() {
-        when (intent) {
-
-            is AddTaskContract.Intent.Init -> {
-                reduce { state.copy(isLoading = true) }
-                reduce { state.copy(date = intent.date) }
-                reduce { state.copy(isLoading = false) }
-            }
-
-            is AddTaskContract.Intent.Date -> {
-                reduce { state.copy(date = intent.date) }
-            }
-
-
-            is AddTaskContract.Intent.Save -> {
-                insertUseCase.invoke(intent.data, state.internet).onStart {
-                    reduce { state.copy(isLoading = true) }
-                }.onEach {
-                    direction.back()
-                }.onCompletion {
-                    reduce { state.copy(isLoading = false) }
-                }.launchIn(viewModelScope)
-            }
-
-
-            is AddTaskContract.Intent.Update -> {
-                updateUseCase.invoke(intent.data, state.internet).onStart {
-                    reduce { state.copy(isLoading = true) }
-                }.onEach {
-                    direction.back()
-                }.onCompletion {
-                    reduce { state.copy(isLoading = false) }
-                }.launchIn(viewModelScope)
-            }
-
-            is AddTaskContract.Intent.Delete -> {
-                deleteUseCase.invoke(intent.data, state.internet).onStart {
-                    reduce { state.copy(isLoading = true) }
-                }.onEach {
-                    direction.back()
-                }.onCompletion {
-                    reduce { state.copy(isLoading = false) }
-                }.launchIn(viewModelScope)
-            }
-
-
-            AddTaskContract.Intent.SetTheme -> {
-                setThemeUseCase.invoke().onEach {}.launchIn(viewModelScope)
-            }
-
-            AddTaskContract.Intent.Back -> {
-                viewModelScope.launch { direction.back() }
-            }
-        }
-    }
+  }
 }

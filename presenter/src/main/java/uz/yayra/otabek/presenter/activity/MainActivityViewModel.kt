@@ -11,6 +11,5 @@ Developed by Otabek Nortojiyev
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(private val getThemeUseCase: GetThemeUseCase) : ViewModel() {
-
-    fun getTheme(): Boolean = getThemeUseCase()
+  fun getTheme(): Boolean = getThemeUseCase()
 }
