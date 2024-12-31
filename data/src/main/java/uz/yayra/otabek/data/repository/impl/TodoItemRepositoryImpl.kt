@@ -43,8 +43,9 @@ class TodoItemRepositoryImpl @Inject constructor(
                 localStorage.revision = response.body()!!.revision
                 Result.success(if (isShow) dao.getAllTodo() else dao.getAllActive())
             } else if (response.errorBody() != null) {
-                val error = gson.fromJson(response.errorBody()!!.string(), ErrorMessage::class.java)
-                Result.failure(Exception(error.message))
+//                val error = gson.fromJson(response.errorBody()!!.string(), ErrorMessage::class.java)
+//                Result.failure(Exception(error.message))
+                Result.failure(Exception("Some error"))
             } else {
                 Result.failure(Throwable(response.message()))
             }
