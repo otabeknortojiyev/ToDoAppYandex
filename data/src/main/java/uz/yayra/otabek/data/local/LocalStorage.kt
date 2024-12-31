@@ -9,4 +9,5 @@ class LocalStorage @Inject constructor(@ApplicationContext context: Context) : S
     var eye by booleans(true)
     var token by strings("Nellas")
     var revision by ints(0)
+    var appid by strings("")
 }
